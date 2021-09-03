@@ -82,17 +82,16 @@ class Interpreter(object):
 
     def expr(self):
         """the FSM that expects a sequence of terms"""
-        left = self.term()
 
-        if self._current_token.type == PLUS:
-            self.eat(PLUS)
-            right = self.term()
-            result = left + right
-        if self._current_token.type == MINUS:
-            self.eat(MINUS)
-            right = self._current_token.value
-            right = self.term()
-            result = left - right
+        result = self.term()
+        while self._current_token.type in [PLUS, MINUS]:
+            if self._current_token.type == PLUS:
+                self.eat(PLUS)
+                result += self.term()
+            if self._current_token.type == MINUS:
+                self.eat(MINUS)
+                right = self._current_token.value
+                result -= self.term()
         print(result)
 
 
@@ -101,11 +100,11 @@ class Interpreter(object):
 
 if __name__ == "__main__":
     while True:
+        text = str(raw_input("calc> "))
         try:
-            text = str(raw_input("calc> "))
             i = Interpreter(text)
             i.expr()
-        except Exception, e:
+        except Exception as e:
             pass
         if len(text) == 0:
             break
