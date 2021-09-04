@@ -118,9 +118,15 @@ class Interpreter(object):
         return token.value
 
     def expr(self):
-        """the FSM that expects a sequence of terms"""
+        """
+        the FSM that expects a sequence of terms
+
+        expr: term ((PLUS|MINUS|MUL|DIV) term)*
+        term: INTEGER
+        """
 
         result = self._term()
+
         while self._current_token.type in [PLUS, MINUS, DIV, MUL]:
             if self._current_token.type == PLUS:
                 self._eat(PLUS)
