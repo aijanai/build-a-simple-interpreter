@@ -21,43 +21,56 @@ class Lexer(object):
 
     def __init__(self, text):
         self._text = text
-        self._current_char = None
-        self._current_position = -1
+        self._current_position = 0
+        self._current_char = self._text[self._current_position]
+        self._text_len = len(self._text)
+        self._current_token = None
 
     def advance(self):
         """read another unit of the input in the current state"""
-        # check pointer bounds
-        if (self._current_position + 1) == len(self._text):
-            return Token(EOF, None)
-
         # advance pointer
         self._current_position+=1
 
-        self._current_char = self._text[self._current_position]
+        # check pointer bounds
+        if self._current_position +1 > self._text_len :
+            self._current_char = None
+            self._current_position = self._text_len
+        else:
+            self._current_char = self._text[self._current_position]
+
+    def _parse_integer(self):
+        """parse multi digit integer"""
+        number = ''
+        while self._current_char is not None and self._current_char.isdigit() :
+            number += self._current_char
+            self.advance()
+        return int(number)
 
     def get_next_token(self):
         """interpret current state into a token"""
 
-        # get current char
-        self.advance()
-
         # infer a symbol
         symbol = None
 
-        if self._current_char == '+':
+        current_char = self._current_char
+
+        if current_char is None:
+            return Token(EOF, current_char)
+        if current_char == '+':
             symbol = PLUS
-            token = Token(symbol, self._current_char)
-        if self._current_char == '-':
+            self.advance()
+            return Token(symbol, current_char)
+        if current_char == '-':
             symbol = MINUS
-            token = Token(symbol, self._current_char)
-        if self._current_char.isdigit():
+            self.advance()
+            return Token(symbol, current_char)
+        if current_char.isdigit():
+            number = self._parse_integer()
             symbol = INTEGER
-            token = Token(symbol, int(self._current_char))
+            return Token(symbol, int(number))
         if symbol == None:
             raise Exception("Can't parse symbol {symbol}".format(symbol=self._current_char))
 
-        # return a token
-        return token
 
 
 # interpreter: sends string and judges order of token into actual actions
@@ -76,9 +89,9 @@ class Interpreter(object):
 
     def term(self):
         """return current token as a terminal (INTEGER) and consume the tape"""
-        token = self._current_token.value
+        token = self._current_token
         self.eat(INTEGER)
-        return token
+        return token.value
 
     def expr(self):
         """the FSM that expects a sequence of terms"""
@@ -87,12 +100,11 @@ class Interpreter(object):
         while self._current_token.type in [PLUS, MINUS]:
             if self._current_token.type == PLUS:
                 self.eat(PLUS)
-                result += self.term()
+                result = result + self.term()
             if self._current_token.type == MINUS:
                 self.eat(MINUS)
-                right = self._current_token.value
-                result -= self.term()
-        print(result)
+                result = result - self.term()
+        return result
 
 
 
@@ -100,10 +112,12 @@ class Interpreter(object):
 
 if __name__ == "__main__":
     while True:
-        text = str(raw_input("calc> "))
+        text = ''
         try:
+            text = str(input("calc> "))
             i = Interpreter(text)
-            i.expr()
+            result = i.expr()
+            print(result)
         except Exception as e:
             pass
         if len(text) == 0:
