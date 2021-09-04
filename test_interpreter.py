@@ -90,3 +90,8 @@ class InterpreterTest(unittest.TestCase):
                 i = Interpreter(text)
                 result = i.expr()
                 assert(result == -11)
+
+                text = "6-7*2"
+                i = Interpreter(text)
+                result = i.expr()
+                assert(result == -8)

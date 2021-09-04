@@ -117,25 +117,11 @@ class Interpreter(object):
         self._eat(INTEGER)
         return token.value
 
-    def expr(self):
-        """
-        the FSM that expects a sequence of terms
-
-        expr: term ((PLUS|MINUS|MUL|DIV) term)*
-        term: INTEGER
-        """
-
+    def _factor(self):
+        """factor: term((MUL|DIV) term)*"""
         result = self._term()
 
-        while self._current_token.type in [PLUS, MINUS, DIV, MUL]:
-            if self._current_token.type == PLUS:
-                self._eat(PLUS)
-                result = result + self._term()
-                continue
-            if self._current_token.type == MINUS:
-                self._eat(MINUS)
-                result = result - self._term()
-                continue
+        while self._current_token.type in [DIV, MUL]:
             if self._current_token.type == DIV:
                 self._eat(DIV)
                 result = int(result / self._term())
@@ -146,10 +132,29 @@ class Interpreter(object):
                 continue
         return result
 
+    def expr(self):
+        """
+        the FSM that expects a sequence of terms
 
+        expr: factor ((PLUS|MINUS) factor)*
+        factor: term((MUL|DIV) term)*
+        term: INTEGER
+        """
+
+        result = self._factor()
+
+        while self._current_token.type in [PLUS, MINUS]:
+            if self._current_token.type == PLUS:
+                self._eat(PLUS)
+                result = result + self._factor()
+                continue
+            if self._current_token.type == MINUS:
+                self._eat(MINUS)
+                result = result - self._factor()
+                continue
+        return result
 
 # main: interactive prompt
-
 if __name__ == "__main__":
     while True:
         text = ''
