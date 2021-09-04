@@ -56,6 +56,55 @@ class LexerTest(unittest.TestCase):
                 assert(t.value == None)
                 assert(t.type == EOF)
 
+        def test_get_next_token_whitespace(self):
+                text_1plus1 = "1 + 1"
+                l = Lexer(text_1plus1)
+
+                t = l.get_next_token()
+                assert(t.value == 1)
+                assert(t.type == INTEGER)
+                t = l.get_next_token()
+                assert(t.value == '+')
+                assert(t.type == PLUS)
+                t = l.get_next_token()
+                assert(t.value == 1)
+                assert(t.type == INTEGER)
+                t = l.get_next_token()
+                assert(t.value == None)
+                assert(t.type == EOF)
+
+                text_1plus1 = "1 +1"
+                l = Lexer(text_1plus1)
+
+                t = l.get_next_token()
+                assert(t.value == 1)
+                assert(t.type == INTEGER)
+                t = l.get_next_token()
+                assert(t.value == '+')
+                assert(t.type == PLUS)
+                t = l.get_next_token()
+                assert(t.value == 1)
+                assert(t.type == INTEGER)
+                t = l.get_next_token()
+                assert(t.value == None)
+                assert(t.type == EOF)
+
+                text_1plus1 = "1+ 1"
+                l = Lexer(text_1plus1)
+
+                t = l.get_next_token()
+                assert(t.value == 1)
+                assert(t.type == INTEGER)
+                t = l.get_next_token()
+                assert(t.value == '+')
+                assert(t.type == PLUS)
+                t = l.get_next_token()
+                assert(t.value == 1)
+                assert(t.type == INTEGER)
+                t = l.get_next_token()
+                assert(t.value == None)
+                assert(t.type == EOF)
+
         def test_get_next_token_1minus1(self):
                 text_1minus1 = "1-1"
                 l = Lexer(text_1minus1)

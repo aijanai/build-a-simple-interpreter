@@ -38,6 +38,9 @@ class Lexer(object):
         else:
             self._current_char = self._text[self._current_position]
 
+    def __skip_whitespace(self):
+        while self._current_char.isspace():
+            self._advance()
 
     def _parse_integer(self):
         """parse multi digit integer"""
@@ -53,24 +56,30 @@ class Lexer(object):
         # infer a symbol
         symbol = None
 
-        current_char = self._current_char
 
-        if current_char is None:
-            return Token(EOF, current_char)
-        if current_char == '+':
-            symbol = PLUS
-            self._advance()
-            return Token(symbol, current_char)
-        if current_char == '-':
-            symbol = MINUS
-            self._advance()
-            return Token(symbol, current_char)
-        if current_char.isdigit():
-            number = self._parse_integer()
-            symbol = INTEGER
-            return Token(symbol, int(number))
-        if symbol == None:
-            raise Exception("Can't parse symbol {symbol}".format(symbol=self._current_char))
+        while True:
+            current_char = self._current_char
+
+            if current_char is None:
+                return Token(EOF, current_char)
+            if current_char.isspace():
+                self.__skip_whitespace()
+                continue
+
+            if current_char == '+':
+                symbol = PLUS
+                self._advance()
+                return Token(symbol, current_char)
+            if current_char == '-':
+                symbol = MINUS
+                self._advance()
+                return Token(symbol, current_char)
+            if current_char.isdigit():
+                number = self._parse_integer()
+                symbol = INTEGER
+                return Token(symbol, int(number))
+            if symbol == None:
+                raise Exception("Can't parse symbol {symbol}".format(symbol=self._current_char))
 
 
 
