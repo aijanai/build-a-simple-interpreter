@@ -95,3 +95,18 @@ class InterpreterTest(unittest.TestCase):
                 i = Interpreter(text)
                 result = i.expr()
                 assert(result == -8)
+
+                text = "(3+2)*8"
+                i = Interpreter(text)
+                result = i.expr()
+                assert(result == 40)
+
+                text = "(3*2)*8"
+                i = Interpreter(text)
+                result = i.expr()
+                assert(result == 48)
+
+                text = "(((3)))"
+                i = Interpreter(text)
+                result = i.expr()
+                assert(result == 3)

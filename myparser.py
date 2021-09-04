@@ -1,5 +1,5 @@
 
-EOF, INTEGER, PLUS, MINUS, MUL, DIV= 'EOF', 'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV'
+EOF, INTEGER, PLUS, MINUS, MUL, DIV, LPAR, RPAR= 'EOF', 'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV', 'LPAR', 'RPAR'
 # token: models content and type of data
 class Token(object):
 
@@ -87,6 +87,16 @@ class Lexer(object):
                 self._advance()
                 return Token(symbol, current_char)
 
+            if current_char == '(':
+                symbol = LPAR
+                self._advance()
+                return Token(symbol, current_char)
+
+            if current_char == ')':
+                symbol = RPAR
+                self._advance()
+                return Token(symbol, current_char)
+
             if current_char.isdigit():
                 number = self._parse_integer()
                 symbol = INTEGER
@@ -114,8 +124,15 @@ class Interpreter(object):
     def _term(self):
         """return current token as a terminal (INTEGER) and consume the tape"""
         token = self._current_token
-        self._eat(INTEGER)
-        return token.value
+        if token.type == LPAR:
+            self._eat(LPAR)
+            result = self.expr()
+            self._eat(RPAR)
+            return result
+        if token.type == INTEGER:
+           self._eat(INTEGER)
+           return token.value
+        raise Exception(f"Unexpected term {token.type}")
 
     def _factor(self):
         """factor: term((MUL|DIV) term)*"""
@@ -138,7 +155,7 @@ class Interpreter(object):
 
         expr: factor ((PLUS|MINUS) factor)*
         factor: term((MUL|DIV) term)*
-        term: INTEGER
+        term: (INTEGER|LPAR expr RPAR)
         """
 
         result = self._factor()
@@ -164,6 +181,6 @@ if __name__ == "__main__":
             result = i.expr()
             print(result)
         except Exception as e:
-            pass
+            print(e)
         if len(text) == 0:
             break
