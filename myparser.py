@@ -181,6 +181,6 @@ if __name__ == "__main__":
             result = i.expr()
             print(result)
         except Exception as e:
+            if len(text) == 0:
+                break
             print(e)
-        if len(text) == 0:
-            break
