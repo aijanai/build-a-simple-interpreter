@@ -180,3 +180,13 @@ class LexerTest(unittest.TestCase):
                 t = l.get_next_token()
                 assert(t.value == None)
                 assert(t.type == EOF)
+
+        def test_get_next_token_invalid(self):
+                text_multi = '@'
+                l = Lexer(text_multi)
+
+                try:
+                        t = l.get_next_token()
+                        pytest.fail("It shouldn't parse @")
+                except:
+                        assert(l._current_char == '@')

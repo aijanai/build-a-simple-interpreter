@@ -54,8 +54,6 @@ class Lexer(object):
         """interpret current state into a token"""
 
         # infer a symbol
-        symbol = None
-
 
         while True:
             current_char = self._current_char
@@ -102,8 +100,7 @@ class Lexer(object):
                 symbol = INTEGER
                 return Token(symbol, int(number))
 
-            if symbol == None:
-                raise Exception("Can't parse symbol {symbol}".format(symbol=self._current_char))
+            raise Exception("Can't parse symbol {symbol}".format(symbol=self._current_char))
 
 
 
