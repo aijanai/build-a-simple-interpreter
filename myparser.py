@@ -26,7 +26,7 @@ class Lexer(object):
         self._text_len = len(self._text)
         self._current_token = None
 
-    def advance(self):
+    def _advance(self):
         """read another unit of the input in the current state"""
         # advance pointer
         self._current_position+=1
@@ -38,12 +38,13 @@ class Lexer(object):
         else:
             self._current_char = self._text[self._current_position]
 
+
     def _parse_integer(self):
         """parse multi digit integer"""
         number = ''
         while self._current_char is not None and self._current_char.isdigit() :
             number += self._current_char
-            self.advance()
+            self._advance()
         return int(number)
 
     def get_next_token(self):
@@ -58,11 +59,11 @@ class Lexer(object):
             return Token(EOF, current_char)
         if current_char == '+':
             symbol = PLUS
-            self.advance()
+            self._advance()
             return Token(symbol, current_char)
         if current_char == '-':
             symbol = MINUS
-            self.advance()
+            self._advance()
             return Token(symbol, current_char)
         if current_char.isdigit():
             number = self._parse_integer()
@@ -79,7 +80,7 @@ class Interpreter(object):
         self._lexer = Lexer(text)
         self._current_token = self._lexer.get_next_token()
 
-    def eat(self, symbol):
+    def _eat(self, symbol):
         """consume the lexer tape with an expected symbol. tape doesn't advance if symbol is unexpected"""
         if self._current_token.type == symbol:
             token = self._lexer.get_next_token()
@@ -87,23 +88,23 @@ class Interpreter(object):
         else:
             raise Exception("Unexpected symbol {symbol}".format(symbol=symbol))
 
-    def term(self):
+    def _term(self):
         """return current token as a terminal (INTEGER) and consume the tape"""
         token = self._current_token
-        self.eat(INTEGER)
+        self._eat(INTEGER)
         return token.value
 
     def expr(self):
         """the FSM that expects a sequence of terms"""
 
-        result = self.term()
+        result = self._term()
         while self._current_token.type in [PLUS, MINUS]:
             if self._current_token.type == PLUS:
-                self.eat(PLUS)
-                result = result + self.term()
+                self._eat(PLUS)
+                result = result + self._term()
             if self._current_token.type == MINUS:
-                self.eat(MINUS)
-                result = result - self.term()
+                self._eat(MINUS)
+                result = result - self._term()
         return result
 
 

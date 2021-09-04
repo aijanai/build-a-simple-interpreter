@@ -13,7 +13,7 @@ class InterpreterTest(unittest.TestCase):
                 text = "1+1"
                 i = Interpreter(text)
                 try:
-                        i.eat(INTEGER)
+                        i._eat(INTEGER)
                 except:
                         pytest.fail("It shouldn't throw")
 
@@ -24,14 +24,14 @@ class InterpreterTest(unittest.TestCase):
                 text = "1+1"
                 i = Interpreter(text)
                 try:
-                        i.eat(PLUS)
+                        i._eat(PLUS)
                 except:
                         assert(i._current_token.value == 1)
                         assert(i._current_token.type == INTEGER)
 
                 i = Interpreter(text)
                 try:
-                        i.eat(EOF)
+                        i._eat(EOF)
                 except:
                         assert(i._current_token.value == 1)
                         assert(i._current_token.type == INTEGER)
@@ -40,7 +40,7 @@ class InterpreterTest(unittest.TestCase):
                 text = "1+1"
                 i = Interpreter(text)
                 try:
-                        res = i.term()
+                        res = i._term()
                         assert(res == 1)
                 except:
                         pytest.fail("It shouldn't throw")
@@ -49,13 +49,13 @@ class InterpreterTest(unittest.TestCase):
                 text = "1+1"
                 i = Interpreter(text)
                 try:
-                        res = i.term()
-                        res = i.term()
+                        res = i._term()
+                        res = i._term()
                         pytest.fail("PLUS is not a term")
                 except:
                         assert(res == 1)
 
-        def test_term(self):
+        def test__term(self):
                 text = "1+1"
                 i = Interpreter(text)
                 result = i.expr()
