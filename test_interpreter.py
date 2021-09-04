@@ -55,28 +55,26 @@ class InterpreterTest(unittest.TestCase):
                 except:
                         assert(res == 1)
 
-        def test__term(self):
-                text = "1+1"
-                i = Interpreter(text)
-                result = i.expr()
-                assert(result == 2)
-
+        def test_term_multidigit(self):
                 text = "10+1"
                 i = Interpreter(text)
                 result = i.expr()
                 assert(result == 11)
 
+        def test_term_zero(self):
                 text = "1-1"
                 i = Interpreter(text)
                 result = i.expr()
                 assert(result == 0)
 
-                text = "7-6"
-                i = Interpreter(text)
-                result = i.expr()
-                assert(result == 1)
-
+        def test_term_negative(self):
                 text = "6-7"
                 i = Interpreter(text)
                 result = i.expr()
                 assert(result == -1)
+
+        def test_term_multi_operands(self):
+                text = "6-7+0-10"
+                i = Interpreter(text)
+                result = i.expr()
+                assert(result == -11)

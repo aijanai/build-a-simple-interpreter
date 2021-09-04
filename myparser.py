@@ -111,9 +111,11 @@ class Interpreter(object):
             if self._current_token.type == PLUS:
                 self._eat(PLUS)
                 result = result + self._term()
+                continue
             if self._current_token.type == MINUS:
                 self._eat(MINUS)
                 result = result - self._term()
+                continue
         return result
 
 
