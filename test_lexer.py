@@ -39,7 +39,7 @@ class LexerTest(unittest.TestCase):
                 assert(l._current_position == 1)
                 assert(l._current_char == None)
 
-        def test_get_next_token_1plus1(self):
+        def test_get_next_token_plus(self):
                 text_1plus1 = "1+1"
                 l = Lexer(text_1plus1)
 
@@ -105,7 +105,7 @@ class LexerTest(unittest.TestCase):
                 assert(t.value == None)
                 assert(t.type == EOF)
 
-        def test_get_next_token_1minus1(self):
+        def test_get_next_token_minus(self):
                 text_1minus1 = "1-1"
                 l = Lexer(text_1minus1)
 
@@ -117,6 +117,40 @@ class LexerTest(unittest.TestCase):
                 assert(t.type == MINUS)
                 t = l.get_next_token()
                 assert(t.value == 1)
+                assert(t.type == INTEGER)
+                t = l.get_next_token()
+                assert(t.value == None)
+                assert(t.type == EOF)
+
+        def test_get_next_token_mul(self):
+                text_2x3 = "2*3"
+                l = Lexer(text_2x3)
+
+                t = l.get_next_token()
+                assert(t.value == 2)
+                assert(t.type == INTEGER)
+                t = l.get_next_token()
+                assert(t.value == '*')
+                assert(t.type == MUL)
+                t = l.get_next_token()
+                assert(t.value == 3)
+                assert(t.type == INTEGER)
+                t = l.get_next_token()
+                assert(t.value == None)
+                assert(t.type == EOF)
+
+        def test_get_next_token_div(self):
+                text_4div2 = "4/2"
+                l = Lexer(text_4div2)
+
+                t = l.get_next_token()
+                assert(t.value == 4)
+                assert(t.type == INTEGER)
+                t = l.get_next_token()
+                assert(t.value == '/')
+                assert(t.type == DIV)
+                t = l.get_next_token()
+                assert(t.value == 2)
                 assert(t.type == INTEGER)
                 t = l.get_next_token()
                 assert(t.value == None)

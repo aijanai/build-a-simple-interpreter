@@ -1,5 +1,5 @@
 
-EOF, INTEGER, PLUS, MINUS = 'EOF', 'INTEGER', 'PLUS', 'MINUS'
+EOF, INTEGER, PLUS, MINUS, MUL, DIV= 'EOF', 'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV'
 # token: models content and type of data
 class Token(object):
 
@@ -32,7 +32,7 @@ class Lexer(object):
         self._current_position+=1
 
         # check pointer bounds
-        if self._current_position +1 > self._text_len :
+        if self._current_position >= self._text_len :
             self._current_char = None
             self._current_position = self._text_len
         else:
@@ -62,22 +62,36 @@ class Lexer(object):
 
             if current_char is None:
                 return Token(EOF, current_char)
+
             if current_char.isspace():
                 self.__skip_whitespace()
                 continue
+
+            if current_char == '/':
+                symbol = DIV
+                self._advance()
+                return Token(symbol, current_char)
+
+            if current_char == '*':
+                symbol = MUL
+                self._advance()
+                return Token(symbol, current_char)
 
             if current_char == '+':
                 symbol = PLUS
                 self._advance()
                 return Token(symbol, current_char)
+
             if current_char == '-':
                 symbol = MINUS
                 self._advance()
                 return Token(symbol, current_char)
+
             if current_char.isdigit():
                 number = self._parse_integer()
                 symbol = INTEGER
                 return Token(symbol, int(number))
+
             if symbol == None:
                 raise Exception("Can't parse symbol {symbol}".format(symbol=self._current_char))
 
@@ -107,7 +121,7 @@ class Interpreter(object):
         """the FSM that expects a sequence of terms"""
 
         result = self._term()
-        while self._current_token.type in [PLUS, MINUS]:
+        while self._current_token.type in [PLUS, MINUS, DIV, MUL]:
             if self._current_token.type == PLUS:
                 self._eat(PLUS)
                 result = result + self._term()
@@ -115,6 +129,14 @@ class Interpreter(object):
             if self._current_token.type == MINUS:
                 self._eat(MINUS)
                 result = result - self._term()
+                continue
+            if self._current_token.type == DIV:
+                self._eat(DIV)
+                result = int(result / self._term())
+                continue
+            if self._current_token.type == MUL:
+                self._eat(MUL)
+                result = result * self._term()
                 continue
         return result
 
