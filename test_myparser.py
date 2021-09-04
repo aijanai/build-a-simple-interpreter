@@ -73,4 +73,27 @@ class LexerTest(unittest.TestCase):
                 assert(t.value == None)
                 assert(t.type == EOF)
 
- #       def test_get_next_token
+        def test_parse_integer(self):
+                text_multi = '1111'
+                l = Lexer(text_multi)
+
+                t = l.get_next_token()
+                assert(t.value == 1111)
+                assert(t.type == INTEGER)
+
+        def test_get_next_token_multidigit(self):
+                text_multi = '111+222'
+                l = Lexer(text_multi)
+
+                t = l.get_next_token()
+                assert(t.value == 111)
+                assert(t.type == INTEGER)
+                t = l.get_next_token()
+                assert(t.value == '+')
+                assert(t.type == PLUS)
+                t = l.get_next_token()
+                assert(t.value == 222)
+                assert(t.type == INTEGER)
+                t = l.get_next_token()
+                assert(t.value == None)
+                assert(t.type == EOF)
