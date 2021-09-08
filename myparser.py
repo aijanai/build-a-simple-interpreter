@@ -104,8 +104,8 @@ class Lexer(object):
 
 
 
-# interpreter: sends string and judges order of token into actual actions
-class Interpreter(object):
+# parser: sends string and judges order of token into actual actions
+class Parser(object):
     def __init__(self, text):
         self._lexer = Lexer(text)
         self._current_token = self._lexer.get_next_token()
@@ -168,13 +168,62 @@ class Interpreter(object):
                 continue
         return result
 
+# base node
+class AST(object):
+    pass
+
+# operation node
+class BinOp(AST):
+    def __init__(self, left, op, right):
+        self.left = left
+        self.op = op
+        self.right = right
+
+# value node
+class NumOp(AST):
+    def __init__(self, token):
+        self.token = token
+        self.value = token.value
+
+# provides basic visitor method
+class NodeVisitor(object):
+    def visit(self, node):
+
+        method = 'visit_'+type(node).__name__
+        visitor = getattr(self, method, self.default_visitor)
+        return visitor(node)
+
+    def default_visitor(self, node):
+        raise Exception(f"Unsupported {node}")
+
+# provides implementations of Visitor pattern
+class NodeInterpreter(NodeVisitor):
+    def __init__(self, parser):
+        self.parser = parser
+
+    def visit_NumOp(self, node):
+        return node.value
+
+    def visit_BinOp(self, node):
+        if node.op == MINUS:
+            return self.visit(node.left) - self.visit(node.right)
+        if node.op == PLUS:
+            return self.visit(node.left) + self.visit(node.right)
+        if node.op == MUL:
+            return self.visit(node.left) * self.visit(node.right)
+        if node.op == DIV:
+            return self.visit(node.left) / self.visit(node.right)
+
+    def interpret(self):
+        pass
+
 # main: interactive prompt
 if __name__ == "__main__":
     while True:
         text = ''
         try:
             text = str(input("calc> "))
-            i = Interpreter(text)
+            i = Parser(text)
             result = i.expr()
             print(result)
         except Exception as e:
