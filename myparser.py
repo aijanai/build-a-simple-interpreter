@@ -128,7 +128,7 @@ class Parser(object):
             return result
         if token.type == INTEGER:
            self._eat(INTEGER)
-           return token.value
+           return NumOp(token)
         raise Exception(f"Unexpected term {token.type}")
 
     def _factor(self):
@@ -138,11 +138,11 @@ class Parser(object):
         while self._current_token.type in [DIV, MUL]:
             if self._current_token.type == DIV:
                 self._eat(DIV)
-                result = int(result / self._term())
+                result = BinOp(result, DIV, self._term())
                 continue
             if self._current_token.type == MUL:
                 self._eat(MUL)
-                result = result * self._term()
+                result = BinOp(result, MUL, self._term())
                 continue
         return result
 
@@ -156,15 +156,14 @@ class Parser(object):
         """
 
         result = self._factor()
-
         while self._current_token.type in [PLUS, MINUS]:
             if self._current_token.type == PLUS:
                 self._eat(PLUS)
-                result = result + self._factor()
+                result = BinOp(result, PLUS, self._factor())
                 continue
             if self._current_token.type == MINUS:
                 self._eat(MINUS)
-                result = result - self._factor()
+                result = BinOp(result, MINUS, self._factor())
                 continue
         return result
 
@@ -197,9 +196,9 @@ class NodeVisitor(object):
         raise Exception(f"Unsupported {node}")
 
 # provides implementations of Visitor pattern
-class NodeInterpreter(NodeVisitor):
-    def __init__(self, parser):
-        self.parser = parser
+class Interpreter(NodeVisitor):
+    def __init__(self, text):
+        self._parser = Parser(text)
 
     def visit_NumOp(self, node):
         return node.value
@@ -215,7 +214,8 @@ class NodeInterpreter(NodeVisitor):
             return self.visit(node.left) / self.visit(node.right)
 
     def interpret(self):
-        pass
+        tree = self._parser.expr()
+        return self.visit(tree)
 
 # main: interactive prompt
 if __name__ == "__main__":
@@ -223,8 +223,8 @@ if __name__ == "__main__":
         text = ''
         try:
             text = str(input("calc> "))
-            i = Parser(text)
-            result = i.expr()
+            i = Interpreter(text)
+            result = i.interpret()
             print(result)
         except Exception as e:
             if len(text) == 0:

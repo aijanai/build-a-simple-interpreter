@@ -53,60 +53,79 @@ class ParserTest(unittest.TestCase):
                         res = i._term()
                         pytest.fail("PLUS is not a term")
                 except:
-                        assert(res == 1)
+                        assert(res.value == 1)
 
         def test_expr_multidigit(self):
                 text = "10+1"
                 i = Parser(text)
                 result = i.expr()
-                assert(result == 11)
+                #assert(result == 11)
+                assert(type(result) == BinOp)
+                assert(result.op == PLUS)
 
         def test_expr_zero(self):
                 text = "1-1"
                 i = Parser(text)
                 result = i.expr()
-                assert(result == 0)
+                #assert(result == 0)
+                assert(type(result) == BinOp)
+                assert(result.op == MINUS)
 
         def test_expr_negative(self):
                 text = "6-7"
                 i = Parser(text)
                 result = i.expr()
-                assert(result == -1)
+                #assert(result == -1)
+                assert(type(result) == BinOp)
+                assert(result.op == MINUS)
 
         def test_expr_mul(self):
                 text = "2*3"
                 i = Parser(text)
                 result = i.expr()
-                assert(result == 6)
+                #assert(result == 6)
+                assert(type(result) == BinOp)
+                assert(result.op == MUL)
 
         def test_expr_div(self):
                 text = "4/2"
                 i = Parser(text)
                 result = i.expr()
-                assert(result == 2)
+                #assert(result == 2)
+                assert(type(result) == BinOp)
+                assert(result.op == DIV)
 
         def test_expr_multi_operands(self):
-                text = "6-7+0-10"
+                text = "6-7+0+10"
                 i = Parser(text)
                 result = i.expr()
-                assert(result == -11)
+                #assert(result == 9)
+                assert(type(result) == BinOp)
+                assert(result.op == PLUS)
 
                 text = "6-7*2"
                 i = Parser(text)
                 result = i.expr()
-                assert(result == -8)
+                #assert(result == -8)
+                assert(type(result) == BinOp)
+                assert(result.op == MINUS)
 
                 text = "(3+2)*8"
                 i = Parser(text)
                 result = i.expr()
-                assert(result == 40)
+                #assert(result == 40)
+                assert(type(result) == BinOp)
+                assert(result.op == MUL)
 
                 text = "(3*2)*8"
                 i = Parser(text)
                 result = i.expr()
-                assert(result == 48)
+                #assert(result == 48)
+                assert(type(result) == BinOp)
+                assert(result.op == MUL)
 
                 text = "(((3)))"
                 i = Parser(text)
                 result = i.expr()
-                assert(result == 3)
+                assert(type(result) == NumOp)
+                assert(result.value == 3)
