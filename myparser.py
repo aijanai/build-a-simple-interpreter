@@ -226,6 +226,8 @@ if __name__ == "__main__":
             i = Interpreter(text)
             result = i.interpret()
             print(result)
+        except EOFError as e:
+                break
         except Exception as e:
             if len(text) == 0:
                 break
