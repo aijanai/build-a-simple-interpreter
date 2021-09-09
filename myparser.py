@@ -187,7 +187,6 @@ class NumOp(AST):
 # provides basic visitor method
 class NodeVisitor(object):
     def visit(self, node):
-
         method = 'visit_'+type(node).__name__
         visitor = getattr(self, method, self.default_visitor)
         return visitor(node)
@@ -216,6 +215,34 @@ class Interpreter(NodeVisitor):
     def interpret(self):
         tree = self._parser.expr()
         return self.visit(tree)
+
+class ReversePolishNotationPrinter(Interpreter):
+
+    def visit_BinOp(self, node):
+        result = ''
+        if node.op == MINUS:
+            result = f"{result} {self.visit(node.left)} {self.visit(node.right)} -"
+        if node.op == PLUS:
+            result = f"{result} {self.visit(node.left)} {self.visit(node.right)} +"
+        if node.op == MUL:
+            result = f"{result} {self.visit(node.left)} {self.visit(node.right)} *"
+        if node.op == DIV:
+            result = f"{result} {self.visit(node.left)} {self.visit(node.right)} /"
+        return result.strip()
+
+class LISPNotationPrinter(Interpreter):
+
+    def visit_BinOp(self, node):
+        result = ''
+        if node.op == MINUS:
+            result = f"({result} - {self.visit(node.left)} {self.visit(node.right)})"
+        if node.op == PLUS:
+            result = f"({result} + {self.visit(node.left)} {self.visit(node.right)})"
+        if node.op == MUL:
+            result = f"({result} * {self.visit(node.left)} {self.visit(node.right)})"
+        if node.op == DIV:
+            result = f"({result} / {self.visit(node.left)} {self.visit(node.right)})"
+        return result.strip()
 
 # main: interactive prompt
 if __name__ == "__main__":
