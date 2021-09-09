@@ -64,3 +64,8 @@ class InterprerTest(unittest.TestCase):
                 i = Interpreter(text)
                 result = i.interpret()
                 assert(result == 3)
+
+                text = "5 - - - + - (3 + 4) - +2"
+                i = Interpreter(text)
+                result = i.interpret()
+                assert(result == 10)

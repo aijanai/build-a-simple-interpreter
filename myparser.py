@@ -119,8 +119,14 @@ class Parser(object):
             raise Exception("Unexpected symbol {symbol}".format(symbol=symbol))
 
     def _term(self):
-        """return current token as a terminal (INTEGER) and consume the tape"""
+        """term: (PLUS|MINUS) term | INTEGER | LPAR expr RPAR"""
         token = self._current_token
+        if token.type == PLUS:
+            self._eat(PLUS)
+            return UnaryOp(PLUS, self._term())
+        if token.type == MINUS:
+            self._eat(MINUS)
+            return UnaryOp(MINUS, self._term())
         if token.type == LPAR:
             self._eat(LPAR)
             result = self.expr()
@@ -148,11 +154,7 @@ class Parser(object):
 
     def expr(self):
         """
-        the FSM that expects a sequence of terms
-
         expr: factor ((PLUS|MINUS) factor)*
-        factor: term((MUL|DIV) term)*
-        term: (INTEGER|LPAR expr RPAR)
         """
 
         result = self._factor()
@@ -184,6 +186,12 @@ class NumOp(AST):
         self.token = token
         self.value = token.value
 
+# unary
+class UnaryOp(AST):
+    def __init__(self, op, expr):
+        self.expr = expr
+        self.op = op
+
 # provides basic visitor method
 class NodeVisitor(object):
     def visit(self, node):
@@ -201,6 +209,12 @@ class Interpreter(NodeVisitor):
 
     def visit_NumOp(self, node):
         return node.value
+
+    def visit_UnaryOp(self, node):
+        if node.op == PLUS:
+            return self.visit(node.expr)
+        if node.op == MINUS:
+            return -self.visit(node.expr)
 
     def visit_BinOp(self, node):
         if node.op == MINUS:

@@ -53,7 +53,7 @@ class ParserTest(unittest.TestCase):
                         res = i._term()
                         pytest.fail("PLUS is not a term")
                 except:
-                        assert(res.value == 1)
+                        assert(res.expr.value == 1)
 
         def test_expr_multidigit(self):
                 text = "10+1"
