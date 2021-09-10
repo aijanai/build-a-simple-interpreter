@@ -190,3 +190,27 @@ class LexerTest(unittest.TestCase):
                         pytest.fail("It shouldn't parse @")
                 except:
                         assert(l._current_char == '@')
+
+        def test_pascal_simple_assignment(self):
+                text = 'BEGIN a := 2; END.'
+                l= Lexer(text)
+
+                try:
+                        t = l.get_next_token()
+                        assert(t.type == BEGIN)
+                        t = l.get_next_token()
+                        assert(t.type == ID)
+                        assert(t.value == 'a')
+                        t = l.get_next_token()
+                        assert(t.type == ASSIGN)
+                        t = l.get_next_token()
+                        assert(t.type == INTEGER)
+                        assert(t.value == 2)
+                        t = l.get_next_token()
+                        assert(t.type == SEMI)
+                        t = l.get_next_token()
+                        assert(t.type == END)
+                        t = l.get_next_token()
+                        assert(t.type == DOT)
+                except Exception:
+                        pytest.fail()

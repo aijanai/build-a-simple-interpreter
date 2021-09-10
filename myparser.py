@@ -1,5 +1,7 @@
 
 EOF, INTEGER, PLUS, MINUS, MUL, DIV, LPAR, RPAR= 'EOF', 'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV', 'LPAR', 'RPAR'
+DOT, BEGIN, END, SEMI, ASSIGN, ID = 'DOT', 'BEGIN', 'END', 'SEMI', 'ASSIGN', 'ID'
+
 # token: models content and type of data
 class Token(object):
 
@@ -26,6 +28,14 @@ class Lexer(object):
         self._text_len = len(self._text)
         self._current_token = None
 
+    def _peek(self):
+        """read a unit of the input in the next state without advancing the pointer"""
+        # check pointer bounds
+        if self._current_position +1 >= self._text_len :
+            return None
+        else:
+            return self._text[self._current_position+1]
+
     def _advance(self):
         """read another unit of the input in the current state"""
         # advance pointer
@@ -50,6 +60,22 @@ class Lexer(object):
             self._advance()
         return int(number)
 
+    def _parse_alnum(self):
+        value =''
+        while self._current_char is not None and self._current_char.isalnum():
+            value += self._current_char
+            self._advance()
+
+        # rough, taking BEGIN/END tokens by a dictionary with .get(key, <default ID Token>) is better
+        if value == BEGIN:
+            symbol = BEGIN
+        elif value == END:
+            symbol = END
+        else:
+            symbol = ID
+
+        return Token(symbol, value)
+
     def get_next_token(self):
         """interpret current state into a token"""
 
@@ -65,40 +91,51 @@ class Lexer(object):
                 self.__skip_whitespace()
                 continue
 
-            if current_char == '/':
-                symbol = DIV
+            if current_char == '.':
                 self._advance()
-                return Token(symbol, current_char)
+                return Token(DOT, current_char)
+
+            if current_char == ';':
+                self._advance()
+                return Token(SEMI, current_char)
+
+            if current_char == ':':
+                char_lookup = self._peek()
+                if char_lookup == '=':
+                    self._advance()
+                    self._advance()
+                    return Token(ASSIGN, ':=')
+
+            if current_char == '/':
+                self._advance()
+                return Token(DIV, current_char)
 
             if current_char == '*':
-                symbol = MUL
                 self._advance()
-                return Token(symbol, current_char)
+                return Token(MUL, current_char)
 
             if current_char == '+':
-                symbol = PLUS
                 self._advance()
-                return Token(symbol, current_char)
+                return Token(PLUS, current_char)
 
             if current_char == '-':
-                symbol = MINUS
                 self._advance()
-                return Token(symbol, current_char)
+                return Token(MINUS, current_char)
 
             if current_char == '(':
-                symbol = LPAR
                 self._advance()
-                return Token(symbol, current_char)
+                return Token(LPAR, current_char)
 
             if current_char == ')':
-                symbol = RPAR
                 self._advance()
-                return Token(symbol, current_char)
+                return Token(RPAR, current_char)
+
+            if current_char.isalpha():
+                return self._parse_alnum()
 
             if current_char.isdigit():
                 number = self._parse_integer()
-                symbol = INTEGER
-                return Token(symbol, int(number))
+                return Token(INTEGER, int(number))
 
             raise Exception("Can't parse symbol {symbol}".format(symbol=self._current_char))
 
@@ -119,8 +156,10 @@ class Parser(object):
             raise Exception("Unexpected symbol {symbol}".format(symbol=symbol))
 
     def _term(self):
-        """term: (PLUS|MINUS) term | INTEGER | LPAR expr RPAR"""
+        """term: (PLUS|MINUS) term | INTEGER | LPAR expr RPAR | variable"""
         token = self._current_token
+ #       if token.type == SEMI:
+  #          self._eat(SEMI)
         if token.type == PLUS:
             self._eat(PLUS)
             return UnaryOp(PLUS, self._term())
@@ -135,6 +174,10 @@ class Parser(object):
         if token.type == INTEGER:
            self._eat(INTEGER)
            return NumOp(token)
+        if token.type == ID:
+            self._eat(ID)
+            return VariableOp(token)
+
         raise Exception(f"Unexpected term {token.type}")
 
     def _factor(self):
@@ -151,6 +194,39 @@ class Parser(object):
                 result = BinOp(result, MUL, self._term())
                 continue
         return result
+
+    def program(self):
+        """program: compound_statement END"""
+        result = self.compound_statement()
+        self._eat(DOT)
+        return result
+
+    def compound_statement(self):
+        """compound statement: BEGIN statement_list END"""
+        self._eat(BEGIN)
+        result = self.statement_list()
+        self._eat(END)
+        return result
+
+    def statement_list(self):
+        """statement list: statement | statement SEMI statement_list"""
+        result = [self._statement()]
+        while self._current_token.type == SEMI:
+            self._eat(SEMI)
+            result.append(self._statement())
+            continue
+        return result
+
+    def _statement(self):
+        """statement: compound_statemet | assign_statement | empty"""
+        pass
+
+    def assign_statement(self):
+        """ assign: variable ASSIGN expr"""
+        pass
+
+    def emtpy(self):
+        pass
 
     def expr(self):
         """
